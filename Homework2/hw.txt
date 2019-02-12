@@ -1,0 +1,36 @@
+2.  (3, 5)
+	(3, 6)
+	(3, 4)
+	(2, 4)
+	(1, 4)
+	(1, 3)
+	(1, 2)
+	(1, 1)
+	(2, 1)
+	(3, 3)
+	(4, 5)
+	(5, 5)
+
+4.  (3, 5)
+	(4, 5)
+	(3, 4)
+	(3, 6)
+	(5, 5)
+	(3, 3)
+	(2, 4)
+	(6, 5)
+	(5, 4)
+	(1, 4)
+	(7, 5)
+	(5, 3)
+
+The two algorithms differ as the stack uses the depth-first approach while the queue uses the breadth first approach. Since the stack is popping off its most recently added item, it will begin to search down individual paths rather than exploring out around the starting position. Depending on which order the up/down/left/right checks appear in the algorithm and the size of the maze, the stack approach might take dozens, hundreds, thousands, etc. moves only to realize at the very end that the end point was already on the stack from one of the first few moves. 
+
+The queue algorithm instead uses the depth approach which searches for the end point by expanding out radially from the center. The positions will be checked in the order they were discovered, so this takes away the possibility of the end point being on the queue the entire time and not being popped off until the end like the stack. The breadth-first approach with the queue will find the most direct path to the end point and the average case will take less iterations through the algorithm than depth first. 
+
+
+
+
+
+
+
