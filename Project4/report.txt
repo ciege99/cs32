@@ -1,0 +1,76 @@
+1. I have no known bugs or unfinished parts of my project.
+
+2. The only Big-O requirements that I am unsure about is the Big-O of sorting the vector of results for my findRelatedGenomes function. While the rest of my function follows the Q*X requirement of the spec, I sort out my results by inserting them into a set using a genomeMatch sorting function that I defined to do the sorting. This insert of all of the elements would be O(n*log n) with n in the worst case being all of the genomes in the class object. However, this n is much smaller than the O(X) of the findGenomesWithThisDNA function call and thus should be negligible. 
+
+3. 
+ ----------
+|trie::find|
+ ----------
+if the first character in the key matches the start of a segment of DNA
+	call recursive find function on the node ptr that corresponds to that char
+else
+	return empty vector
+
+recursive function's impl:
+
+if the passed in node ptr is nullptr
+	return empty vector
+
+if the first char in the passed in string 
+does not match the passed in node pointer's base char and exactMatchOnly is true
+	return empty vector
+
+if the string's size is 1 and the string's char either matches the node pointer's base char or it doesn't but exactMatchOnly is false
+	return the node pointer's vector of values
+
+
+if the initial character in the string does not equal the node pointer's base char and exactMatchOnly is false
+	set exactMatchOnly to true
+
+for all of the children of the node pointer
+	call recursive function on the child and add the return values to a results vector
+
+return the vector of results
+
+
+ ------------------------
+|findGenomesWithThisDNA()|
+ ------------------------
+
+if minimumLength is < the minimum length of the class object
+	return false
+
+create a vector of possible DNA matches and set it equal to the results of find with the substring of the fragment from 0 to the class object's minimum search length passed in
+
+create an empty unordered map that will be used to hold definite matches (with genomeName as index)
+
+for each possible match in the possible vector (possible because they are only prefixes)
+
+	for minimumLength to the length of the fragment
+		see if that length of string can be extracted from possible match's genome at the 
+		possible match's start position
+			break if the string cannot be extracted at that length
+
+	if the length of the extracted string is < minimumLength
+		continue to next possible match
+
+	call RecursiveEquivalentCheck which returns the longest length of a match that is 	
+	possible by comparing the two strings at each position (similar logic to find but 
+	returns the int length)
+
+	if length < minimumLength
+		continue to next possible match
+	
+	set the length of the possible DNA Match's length to be the length found in this func
+	push the match onto the definite unordered map
+
+
+if definites is empty
+	return false, no matches
+
+iterate through each genome's definite Matches and push the longest/earliest DNAMatch onto a vector of results
+
+set matches = the vector of results
+return true
+
+		
