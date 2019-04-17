@@ -1,0 +1,577 @@
+1. 
+ --------
+| Actors |
+ --------
+BaseActor functions
+-- virtual void doSomething() = 0 --
+The doSomething function is the function that defines the behavior of each actor when it is called upon by the move function in StudentWorld. This is pure virtual because every derived class or group of derived classes has different behavior. On top of this, I do not want to allow any instantiations of a BaseActor type or of a derived class that does not have this function defined. 
+
+--void setDead()--
+This function sets the status of a base actor's m_alive member bool to be false, i.e. setting the actor to be dead. This is not virtual as every BaseActor is set dead in the same way and will not need to have this function redefined. This is in the base class as all actors can be killed. 
+
+--virtual void beKilled()--
+This method is what will actually be used to kill each base actor. It is virtual as some derived classes will have different behaviors when they are killed, such as zombie's playing a sound and increasing the player's points. This is in the base class as all actors can be killed. 
+
+-- virtual bool canBeKilled() --
+This function returns true if the derived class can be killed (i.e. citizen, zombie, goodie, etc.) or not (wall, exit). This is virtual so that it can be redefined to return true or false for derived classes. This is in the base class as canBeKilled is used to identify what flames will kill later. 
+
+-- virtual bool canMove() --
+This function is virtual as it is redefined to return true if the derived class can move such as a zombie or citizen. This is in the base class as it is used to find certain actors in finder functions in StudentWorld
+
+-- virtual bool flameCannotOverlap() --
+This function is virtual as it is defined to return false by default, but is redefined to return true for walls and exits. This function is in the base class as it is used for deciding whether a flame can overlap with certain base actors or not. 
+
+-- virtual bool canBeInfected() --
+This function is virtual as it is defined to return false by default, but it is redefined to return true for moveable actors (zombies, citizens, players). This is in the base class as it will be used to figure out which actors canBeInfected by vomit projectiles. 
+
+-- virtual bool hasOverlapAction() --
+This function is virtual as it is defined to return false by default, but it is redefined to return true for actors such as landmines or goodies that do something when they are overlapped with. This is in the base class so that StudentWorld can properly call on their collision behavior. 
+
+-- StudentWorld *getWorld() --
+This returns a pointer to the StudentWorld pointer of each BaseActor. This is in the BaseActor class as it accesses the StudentWorld pointer that is private to this class. 
+
+-- virtual int getMove() --
+This returns the amount that a BaseActor might move on a given move, returning 0 by default. It is virtual as it will be redefined for moveable actors later. This is in the base class as it is 
+
+-- void setInfected() --
+Sets the bool m_isInfected to be true, marking a BaseActor as infected. This is not virtual as all actors will be set as infected the same.
+
+-- bool isInfected() --
+Returns the member variable m_isInfected, it is not virtual as it will have the same behavior for all actors. 
+
+-- void setIsInfectedFalse() --
+Sets the member variable m_isInfected to be false, which effectively sets a character to be healthy. This is not virtual as its behavior is the same for all actors
+
+--virtual ~BaseActor() --
+Does nothing, included as it is best practice for a base class with derived classes. 
+
+
+
+MoveableActors functions
+-- int getTicks() --
+Returns the amount of ticks that a moveable actor has on their tick counter. This is in the MoveableActors class as zombies and citizens both move dependent on their paralysis tick. This is not virtual as it just returns m_ticks, so it is the same for all moveable actors. 
+
+-- void increaseTicks() --
+This increases m_ticks by 1. This is in MoveableActors and not virtual as it is the same action for all moveable actors. 
+
+-- void decreaseTicks() --
+This decreases m_ticks by 1. This is in MoveableActors and not virtual as it is the same action for all moveable actors.
+
+-- void setTicks(int n) --
+This sets m_ticks = n. This is in MoveableActors and not virtual as it is the same action for all moveable actors.
+
+-- void setTicksZero() --
+This sets m_ticks = 0. This is in MoveableActors and not virtual as it is the same action for all moveable actors.
+
+-- bool tickManager() --
+This increases ticks by 1 and returns false if m_ticks == 2 and then sets back to zero if so, returning true otherwise. This is used to detect a paralysis tick for zombies and citizens. This is in MoveableActors and not virtual as it is the same action for all moveable actors.
+    
+-- bool mover() --
+This gets the direction of the moveable actor and moves them in that direction in the appropriate number of pixels if this move would not be blocked. It returns true if a move is made, returns false otherwise. This is in the moveable actors class and not virtual as zombies and citizens follow the same protocol in moving. 
+
+-- virtual bool notBlock() --
+This returns false and is in moveable actors as all moveable actors should block movement. It is virtual as it redefines the function from BaseActor. 
+
+-- virtual bool canMove() --
+This returns true and is in moveable actors because all moveable actors can move. This is virtual as it redefines the method declared in BaseActor. 
+
+-- virtual void beKilled() --
+This is virtual as it redefines beKilled() from BaseActor. It calls the deathProtocol function which defines the death behavior for each moveable actor and then sets the actor dead. This is in moveable actor as it performs the same function calls for all moveable actors. 
+
+-- virtual void deathProtocol() = 0 --
+This is pure virtual and in the MoveableActors class as all derived classes (Penelope, citizens, zombies) should die in a different way that is defined in that class.
+
+
+-- virtual int getMove() --
+This returns the amount of pixels that an actor should move in each tick if they can. It is virtual as it redefines the method from the BaseActor class. It is in MoveableActors as it will be redefined to return 1 as this is the default move amount for zombies (zombies are 1/2 of all moveable actors). 
+    
+-- virtual ~MoveableActors() --
+This is a virtual destructor that does nothing, included for best practice for a class that serves as a base class for a derived class. 
+
+
+
+Environment functions
+-- virtual void doSomething() --
+This is the virtual redefinition of doSomething() from the BaseActor class. This calls the function differentRequirements, which calls the different actions that a derived class of Environment might do during a tick and then checks to see if the environment object has overlapped with anything. 
+
+-- virtual void onCollision() = 0 --
+This is a pure virtual function as all environment objects have some sort of reaction when they overlap with certain actors, but they all differ so this is pure virtual. This is also pure virtual to prevent an object of environment type to be instantiated since the pure virtual doSomething() from BaseActor has now been defined. 
+
+-- virtual bool hasOverlapAction() --
+This is a redefinition of hasOverlapAction() from the BaseActor class and is set to return true in the Environment class as all derived objects of environment have some reaction when they get overlapped with by a moveable actor. 
+
+-- virtual void differentRequirements() = 0 --
+This is a pure virtual function in the Environment class as the derived classes of Environment have different requirements for what they should do during each tick (possibly reduce their lifespan or not).
+
+-- virtual ~Environment() -- 
+Redefines the virtual destructor from BaseActor again as this is best practice for classes that have derived classes. 
+
+
+
+Walls functions
+-- virtual void doSomething() --
+This is virtual as it defines the pure virtual doSomething() from BaseActor. This simply returns as a wall does not do anything during a tick. 
+
+-- virtual void notBlock() --
+This is virtual as it redefines notBlock() from BaseActor and returns false as Walls block movement. 
+
+--virtual bool flameCannotOverlap() --
+This is virtual as it redefines flameCannotOverlap() from BaseActor and returns true as flames cannot overlap walls. 
+
+
+
+Humans functions
+-- virtual bool canBeInfected() --
+This is virtual as it redefines canBeInfected from BaseActor and returns true as humans can be infected in the game. 
+
+-- virtual void doSomething() --
+This is virtual as it redefines the pure virtual doSomething() from BaseActor. This doSomething is in the human class as humans follow the same general behavior with slight differences that are differentiated in this doSomething class through the pure virtual function differentHumanBehavior(). This function simply calls upon the commonHumanActions function and returns if that function is false and then uses differentHumanBehavior() for the different behavior of Penelope and citizens. 
+
+-- virtual void differentHumanBehavior() = 0 --
+This function is pure virtual and included in Humans as it will be redefined to define the different behaviors of Penelope and citizens that is done each tick. This also prevents objects of human type from being instantiated. 
+
+-- bool commonHumanActions() --
+This function is defined in Humans and is not virtual as it carries out the common human actions of Penelope and citizens and returns false if the Penelope and Citizens should not do anything else in the tick for some reason. It checks that the actor is alive, checks if they're infected and increases the infected amount if so, and then kills the actor if the infected amount has reached 500. 
+
+-- int getInfectedTotal() -- 
+This function is defined in Humans and is not virtual as it will perform the same action as returning the infected total for Penelope and citizens. 
+
+-- void increaseInfectedTotal() --
+This function is not virtual and is included in Humans as it will increase the infected amount by 1, which is the same action that will be done for both citizens and Penelope if they are infected.
+
+-- void setHealthy() --
+This function is not virtual and is included in Humans as it will set the infected total to be 0 and will set the isInfected bool from BaseActor to be false. Though Citizens can't be set healthy, Penelope can and I put this function in Humans so I would not have to create more functions to access the private variable for infected total that is in Humans. 
+
+-- virtual ~Humans() --
+This is the virtual destructor for Humans that does nothing but I included as it is best practice to have for a class with derived classes. 
+
+
+
+Zombies functions
+-- virtual void doSomething() --
+This is the virtual redefinition of doSomething from BaseActor and is included in the Zombies class as Zombies largely follow the same behavior besides some differences that are defined in the differentZombieActions() function. The function calls on the commonZombieActions and returns if something happens that should end the zombie's tick. The differentZombieActions are carried out and then the zombie moves and adjusts their planned route if they should. 
+
+-- void modifyPlanDist(int n) --
+This is the function that will reset the distance of a zombie's planned route to be the n value passed in (which will be a random integer that is passed in later). This is not virtual as all zombies will have their planned distances modified. 
+
+-- void setPlanDistZero() --
+This is not virtual and is included in the Zombies base class as all zombies will have instances when their planned distance should be set to zero, which this function will do. 
+
+-- int getPlanDist() --
+This function is not virtual and is included in the Zombies base class as it will get how many more ticks zombies will continue on their path, a functionality that both smart and dumb zombies will use. 
+
+-- bool commonZombieActions() --
+This function is not virtual and is included in the Zombies base class as it will carry out all of the common actions of the zombies. This function checks that the zombie is alive, increases ticks using the tickManager function and returns false if it is a paralysis tick. It then continues on to check if the zombie should vomit and then returns false if so (to end the move since a zombie shouldn't do anything else). It returns true if the zombie should keep carrying on its behavior in doSomething. 
+
+-- void randomDirectionSelector() --
+This function is not virtual and is included in the Zombies class as it will generate a random direction using a switch statement with a random integer passed in, something that will be used to determine a random direction for all zombies. 
+
+-- void randomPlanDist() --
+This function is not virtual and is included in the Zombies class as it will generate a random integer between 3 and 10 and this pass it as the new planned distance for the zombie, something that is necessary for both smart and dumb zombies. 
+
+-- virtual ~Zombies() --
+This function is the virtual destructor of Zombies that does nothing but is included since Zombies will serve as a base class for the derived classes for smart and dumb zombies. 
+
+-- virtual void differentZombieActions() = 0 --
+This function is the pure virtual function that will define the different actions that smart and zombies will do on each tick, and thus should be redefined in the derived classes. 
+
+
+
+Goodies functions
+-- virtual void differentRequirements() --
+This function redefines the pure virtual differentRequirements() function from the Environment base class and just returns as goodies do not have requirements for their onCollision function should be called upon. This is defined here as all goodies have the same different requirements (none). 
+
+-- virtual ~Goodies() --
+This function is the virtual destructor of Goodies that does nothing but is included since Goodies will serve as a base class for the derived classes for the different types of goodies. 
+
+
+
+Permanents functions
+-- virtual bool canBeKilled() --
+This function redefines the canBeKilled() function from BaseActor to return false as all Permanents (pits, projectiles, exits) cannot be killed by other actors. 
+
+-- virtual ~Permanents() --
+This function is the virtual destructor of Permanents that does nothing but is included since Permanents will serve as a base class for the derived classes for the different types of permanents. 
+
+
+
+Penelope functions
+-- virtual void differentHumanBehavior() --
+This function is the redefinition of the pure virtual function differentHumanBehavior from the Humans base class. This function defines Penelope's actions from the user input, taking in getKey() as the parameter for a switch statement and then moves Penelope or does an action with a goodie if possible.
+
+-- virtual void deathProtocol() --
+This function redefines deathProtocol from the MoveableActors for Penelope. Penelope's death protocol is to play the sound for a player death when she is killed. 
+
+-- void addVaccine() --
+This function is not virtual and included in Penelope as it will add a vaccine to Penelope's inventory which will be utilized when Penelope steps on a vaccine goodie. 
+
+-- void addFlames() --
+This function is not virtual and included in Penelope as it will add 5 flames to Penelope's inventory which will be utilized when Penelope steps on a gas can goodie. 
+
+-- void addLandmines() --
+This function is not virtual and included in Penelope as it will add 2 landmines to Penelope's inventory which will be utilized when Penelope steps on a landmine goodie. 
+
+-- int getVaccines() --
+This function is not virtual and included in Penelope as it will return the number of vaccines that Penelope currently has.
+
+-- int getFlames() --
+This function is not virtual and included in Penelope as it will return the number of flame charges that Penelope currently has.
+
+-- int getLandmines() --
+This function is not virtual and included in Penelope as it will return the number of landmines that Penelope currently has.
+
+-- void flamethrower() --
+This function is not virtual and included in Penelope as it will check to see if Penelope has any flame charges and then will call upon the createFlamethrower class in the StudentWorld class and play the corresponding noise and decrease Penelope's flame charges. 
+
+-- void placeLandmine() --
+This function is not virtual and included in Penelope as it will check to see if Penelope has any landmines and then will call upon the createLandmine class in the StudentWorld class and decrease Penelope's landmines.
+
+-- void useVaccine() --
+This function is not virtual and included in Penelope as it will check to see if Penelope has any vaccines and then will use setHealthy() to make Penelope healthy and decrement the number of landmines in Penelope's inventory. 
+
+
+
+Citizens functions
+-- virtual void differentHumanBehavior() --
+This function is the redefinition of the pure virtual function differentHumanBehavior from the Humans base class. This function decides whether a Citizen should be paralyzed this tick using tickManager, and then determines the distance of the citizen from Penelope and the nearest zombie. 
+If distance to Penelope is less than the distance to a zombie and is less than 80 pixels
+	move closer to Penelope
+else if distance to zombie is less than 80
+	determine whether moving in each direction would increase distance to zombie
+	move in the direction that would increase the distance the most
+
+
+-- virtual void deathProtocol() --
+This function redefines deathProtocol from the MoveableActors for Citizens. If a citizen is killed by infection, use the StudentWorld's function for creating a zombie from an infected citizens. If the person is being killed off because they exited, do nothing, and if the person is being killed via pit or flame, play the appropriate noise, decrement the score by 1000 and decrement the number of humans in the game. 
+
+-- void setSaved() --
+This function is not virtual and included in citizen's as it will be used to define that a citizen is being saved and thus has not been killed off from the game in a way that would hurt the player's score. 
+
+-- virtual int getMove() --
+This function redefines the virtual getMove() from the MoveableActors class and returns 2 as this is the amount of pixels that a citizen will move for each tick that it moves. 
+
+
+
+DumbZombies functions
+-- virtual void deathProtocol() --
+This function redefines deathProtocol from the MoveableActors for dumb zombies. This function plays the appropriate noise for a dying zombie, increases the scores by 1000, and uses StudentWorld's function chanceOfVaccine to possibly drop a vaccine upon death. 
+
+-- virtual void differentZombieActions() --
+This function defines the pure virtual function differentZombieActions() from Zombies. For DumbZombies, this function sets a new random planned route and distance for a dumb zombie if the current planned distance is 0. 
+
+
+
+SmartZombies functions
+-- virtual void deathProtocol() --
+This function redefines deathProtocol from the MoveableActors for smart zombies. This function plays the appropriate noise for a dying zombie and increases the scores by 2000.
+
+-- virtual void differentZombieActions() --
+This function defines the pure virtual function differentZombieActions() from Zombies. For smart zombies, this function sets a new random planned route and distance for a dumb zombie if the current planned distance is 0 and there is no human within 80 pixels. If there is a human within 80 pixels, it uses the StudentWorld function findClosestHuman to set the zombie towards a human target. 
+
+
+
+Vaccine functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual onCollision from Environment and defines the behavior of a vaccine goodie when it is overlapped. The function uses StudentWorld's addVaccine to see if the overlapped actor is the player and add vaccines if so. The goodie is then killed.
+
+
+
+GasCan functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual onCollision from Environment and defines the behavior of a gas can goodie when it is overlapped. The function uses StudentWorld's addFlames to see if the overlapping actor is Penelope and then add flame charges if so. The goodie is then killed. 
+
+
+
+LandmineGoodie functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual onCollision from Environment and defines the behavior of a landmine goodie when it is overlapped. The function uses StudentWorld's addLandmines to see if the overlapping actor is Penelope and then add landmines if so. The goodie is then killed. 
+
+
+
+Landmine functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual onCollision from Environment and defines the behavior of a landmine when it is overlapped. If the ticks of the landmine is <= 0 (i.e. it has been alive for more than 50 ticks), then the landmine explosion sound is played, the StudentWorld function createLandmineExplosion is used to make the flames and pit, and the actor that overlapped with the landmine is killed before the landmine itself is killed. 
+
+-- virtual void differentRequirements() --
+This function defines the pure virtual differentRequirements function from Environment. It checks to see if the the ticks of the landmine is greater than 0 and decreases the number of ticks if so (until ticks == 0). 
+
+
+
+Projectiles functions
+-- virtual void differentRequirements() --
+This function defines the pure virtual differentRequirements function from Environment. It checks to see if the projectile is alive and decreases the lifespan of the projectiles if it is. If the the lifespan is < 0, the projectile is killed. This is defined in the projectile base class as both flames and vomit have this lifespan requirement of two ticks. 
+
+-- virtual ~Projectiles() --
+This is the virtual destructor that does nothing but is included as it is best practice since Projectiles has derived classes. 
+
+
+
+Pits functions
+-- virtual void onCollision(BaseActor *a) -- 
+This function defines the onCollision function from Environment and kills an actor if it overlap with the pit. 
+
+-- virtual void differentRequirements() --
+This function defines the pure virtual function differentRequirements from Environment and simply returns as the pit has no requirements before it can start to carry out its function of killing actors who overlap. 
+
+
+
+Exits functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual function onCollision form Environment and calls upon StudentWorld's function playerExit to see whether the actor should be allowed to exit. 
+
+-- virtual bool flameCannotOverlap() --
+This function redefines the virtual function flameCannotOverlap from BaseActor and returns true as flames cannot overlap with Exits. 
+
+-- virtual void differentRequirements() --
+This redefines the pure virtual function differentRequirements() from Environment and simply returns as an exit does not have any requirements before it can start to be used. 
+
+
+
+
+Flames functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual function onCollision from Environment and checks to see if the flame object is alive, and then kills the actor that it is overlapping with if the actor can be killed. 
+
+
+
+Vomit functions
+-- virtual void onCollision(BaseActor *a) --
+This function defines the pure virtual function onCollision from Environment and calls upon the infector function from StudentWorld to decide what to do. 
+
+
+ --------------
+| StudentWorld |
+ --------------
+
+~StudentWorld()
+-----
+This calls the cleanup method.
+
+init()
+-----
+This function sets the bool levelWon to be false, and numHumans and numZombies to be 0, which is the case before anything has been added. The level file is then loaded using an ostringstream and checks for bad loads. Then, the function loops through the level file and adds new actors to the game via pushing them onto the list of actors. When a Citizen or Zombie is added, the numHumans and numZombies counters are incremented, respectively. 
+The setStats() function is then used to set the stat line at the top of the screen and game continues on to the move function. 
+
+move()
+-----
+Loop through all of the actors and check to see each time that Penelope is alive: if she is dead, decLives() and and return the status for a player death. If player is still alive, check that the current actor is alive and call doSomething if so. After the doSomething call, check to see if the level has been won, and return the level won status and play the correct sound if so. At the end of this loop, loop through the actors again and if an actor is dead, erase it from the actors list and erase its data if so. Then at the end of the function, set the stats for the top of the screen and return the status to continue the game. 
+
+cleanUp()
+------
+Loop through the actors and erase all of the actors from the list and delete their data. 
+
+getHumans()
+-----
+Returns the number of living citizens in the level.
+
+
+bool vomitDistance(BaseActor *z)
+------
+Loop through all of the actors, if an actor can be infected, get the direction of the zombie  that has been passed in (this will only be used for zombies) and then use validVomitMaker to see if the zombie should vomit and return true if so, else just return false if the zombie shouldn't vomit. 
+
+bool blockMovement(double newX, double newY, BaseActor* a)
+------
+Check that the passed in actor is alive, return false if not alive. Then, loop through all of the actors and if both actors block movement, check if the newX and newY positions that have been passed in would cover any pixel that the other blocking actor would cover: if this is true, return false. Else, loop through and return true if there is no blocking. 
+
+
+bool overlap(double newX, double newY)
+-----
+Loop through the actors and if there is a living actor whose distance to the passed in coordinates is <= 10, return true. If there are none, return false. 
+
+
+
+bool findClosestHuman(BaseActor* a, double& distTo)
+-------
+Loop through all of the actors and if the actor can be infected, find the distance from the passed in actor to the human. If the distance to that human is the least out of all the humans present on the level, check to see that the distance to that human is less than 80 if so set the direction of the passed in actor a (a zombie) towards that human with SetDirectionClosest and then return true. Otherwise, return false if the distance is too large.
+
+
+double findDistPenelope(BaseActor *a) 
+------
+Use the findEucidDistance function to calculate the distance of the passed in actor to Penelope. 
+
+
+double findClosestZombie(double aX, double aY)
+-------
+If there are no zombies in the game, return the largest distance possible from any two points in the game. Else, loop through the actors and if an actor can move and cannot be infected (is a zombie), return the distance to the nearest zombie. 
+
+
+double findEucidDistance(double aX, double aY, double bX, double bY)
+--------
+Calculate the different between aX and bX and then the difference between aY and bY and then return the square root of the sum of the two differences squared (distance formula). 
+
+
+bool setDirectionToClosest(BaseActor *a, double closestX, double closestY)
+--------
+If a can be infected (a citizen has been passed in for the use of this function) then closestX and closestY should be set to the coordinates of Penelope. Otherwise, use the values of closestX and closestY passed in. Set doubles aX and aY to be the coordinates of the BaseActor a passed in. 
+If on the same row
+	if closest Y is up
+		if a can be infected
+			see if a can move up, and set direction that way and return true
+		else
+			set direction up (zombie is using and blocking doesn't matter)
+	else
+		if a can be infected
+			see if a can move down, and set direction that way and return true
+		else
+			set direction down
+else if on the same col
+	if closest Y is right
+		if a can be infected
+			see if a can move right, and set direction that way and return true
+		else
+			set direction right 
+	else
+		if a can be infected
+			see if a can move left, and set direction that way and return true
+		else
+			set direction left
+else (not on same row or col)
+	randomly select direction towards closestX/Y and see if that move is possible
+	go in that direction if possible, go in other direction if not. 
+	if neither is possible, return false
+	otherwise, return true if the actor can move in some direction towards closest. 
+
+		
+
+bool randomDirSwitch(BaseActor *a, double closestX, double closestY, int n)
+-------
+This is used for setting randomDirection in the setDirectionClosest function
+Takes in the passed in n to a switch and attempts to move the actor towards closest in the vertical direction if n == 1, and attempts to move the actors towards closest in the horizontal direction if n == 2. It returns true if the move is possible (i.e. if it is a citizen, there move would not be blocked). Returns false if the move is not possible. 
+
+
+bool validFlamePosition(BaseActor* a)
+------
+Loop through actors and see if the position of the passed in actor would overlap with any actors that cannot overlap with flame and return false if so. Otherwise, return true. 
+
+
+bool validVomitPosition(BaseActor* a)
+----
+Loop through actors and see if the position of the passed in actor would overlap with any actors that cannot overlap with vomit and return false if so. Otherwise, return true. 
+
+
+bool validVomitMaker(double vomitX, double vomitY, double humanX, double humanY)
+-----
+If the distance between the new vomit's coordinates and human's coordinates would be <= 10 pixels. If this is true, use a switch to generate a random integer between 1 & 3, and for case 1 make a Vomit actor and check that it would be in a vomit position and add it to actors if so, or delete it if not. Default case does nothing as there is a 2/3 chance no vomit is made. Return false if no vomit is made. 
+
+
+
+void posSetter(Direction dir, double origX, double origY, double& posX, double& posY)
+------
+This uses the dir passed in and uses it as a parameter to a switch statement and set posX and posY to be the new position in that direction. 
+
+
+void setLevelWin()
+------
+Sets levelWon to be true so that the game can be ended. 
+
+void setStats()
+-----
+Creates an ostringstream that has the score with a width of 6 and fillers of 0, and takes in the level, lives, vaccs, etc. that are displayed and then convert this ostringstream to a string and use it as the parameter for setGameStatText to update the stat line. 
+
+
+void CollisionChecker(Environment *a)
+-----
+Loop through the actors in the game and if the passed in actor and the current actor in the loop is alive, see if the two actors overlap and call on the a actor's onCollision if so. 
+
+
+void infector(BaseActor *vomit, BaseActor *a)
+------
+If the vomit is alive and the BaseActor a is alive and canBeInfected and isn't already infected, if it is a human play the sound for a citizen being infected, and then for both citizens and zombies set them as infected. 
+
+
+void playerExit(BaseActor* a)
+-----
+If the actor can be infected and isn't the character, decrement the number of humans, increase score by 500, play the sound for a citizen exit, and kill the citizen. Else, if the actor is Penelope and the number of humans left on the level is 0, set the level as won. 
+
+
+void infectedCitizenProtocol(double startX, double startY)
+------
+This function is called when a citizen dies of infection and a zombie needs to take its place. The sound for a zombie being born is played, the score is decremented by 1000, and the number of humans is decremented. Then use a randint between 1 and 10 and use a switch with cases 1-3 to create a SmartZombie in its place, and then the default case to have a DumbZombie be born. 
+
+void decreaseNumHumans()
+----
+Decrement the number of humans by 1.
+
+
+void createLandmine(double startX, double startY)
+-----
+Create a landmine in the position that is passed in and push it onto the actors list.
+
+
+void createLandmineExplosion(double startX, double startY)
+-----
+
+
+void createFlamethrower(double startX, double startY, Direction dir)
+-----
+For the direction passed in, attempt to make three flames in the direction passed in by looping 3 times for startX and startY (i.e. For right, startX + (i*SPRITE_WIDTH), spriteY would be the attempted position). If a flame cannot be made at any of the positions, immediately break and return out of the function. 
+
+bool createFlame(double startX, double startY, Direction dir)
+-----
+Make a flame at the position and with the dir passed in and check to see if it would be in a valid position, push it onto the list of actors if so, don't create if not.
+
+void chanceOfVaccine(Direction dir, double origX, double origY)
+----
+Use a switch and pass in a random integer 1-10. For case 1, use posSetter function to set the position of Vaccine to be flung away from the coordinates of the zombie that were passed in for origX and origY. If these new coordinates do not overlap with anything, then push a vaccine goodie onto the actors list at this position. Otherwise, do nothing if it would overlap and for default cases. 
+    
+bool addVaccine(BaseActor *a)
+-------
+If the BaseActor a that has been passed in is Penelope, increase score by 50, play the sound for getting a goodie, add a vaccine to Penelope's inventory, and return true. Otherwise, return false.
+
+bool addLandmines(BaseActor *a)
+------
+If the BaseActor a that has been passed in is Penelope, increase score by 50, play the sound for getting a goodie, add 2 landmines to Penelope's inventory, and return true. Otherwise, return false.
+
+bool addFlames(BaseActor *a)
+------
+If the BaseActor a that has been passed in is Penelope, increase score by 50, play the sound for getting a goodie, add 5 flame charges to Penelope's inventory, and return true. Otherwise, return false.
+
+
+
+2. I do not have any known bugs at the moment, although at some points early in testing there seemed to be an issue that seemingly at random a flame destroying something would cause a crash, but I switched the flame to be pushed to front for the function that I thought was causing this and I haven't had any crashes since, so I assume that was the fix.  
+
+3. Some assumptions I made had to do with Zombies. The spec does not specify whether a Dumb Zombie could drop a vaccine when they die from a pit, or just from a flame, so I assumed there was a chance of a vaccine being thrown in both cases. The spec also does not specify what to do if the score extends beyond 6 digits, so I simply max out the score width at 6 digits using setw(6). Also, there is not specification on whether certain sounds should play over others in cases where multiple noises might happen and cut each other off (i.e. killing a citizen with a flamethrower), so I just let the sounds play in whatever order my functions happen to call the sounds. 
+
+4. I tested the BaseActor class initially by deriving Penelope directly from BaseActor and seeing that she was still able to function (prior to creating a larger class hierarchy). I also made sure that no objects could be instantiated from the BaseActor class simply by typing a BaseActor object into the StudentWorld.cpp file in init and waiting for the compile error to appear. The usage of functions was tested in my StudentWorld files as all of my actors are denoted by pointers to their BaseActor bases, so my game very much relies on this base class and every run reassures me that my BaseActor class is functional. 
+
+I tested the MoveableActors class by ensuring that all of the functions that are not void or are not further derived in derived classes of this class work well. For example, I tested the mover function in this class by using it with citizens and zombies and ensured that on levels with lots of zombies and citizens, the movement of the citizens and zombies resembled that of the sample games we were given and followed the movement specifications laid out by the spec sheet. I also ensured that this class was an ABC by trying to instantiating an object of MoveableActors type in my StudentWorld.cpp file and receiving an error when I attempted to do so. 
+
+I tested the Environment class by ensuring that all of the derived classes that used non-virtual functions from this base class behaved correctly. For instance, I tested that on each tick in games, classes that were derived from environment and did not redefine doSomething did nothing during each tick, since Environment objects by default simply return for doSomething(). I also tested it by ensuring that hasOverlapAction() returns true for Environment objects as opposed to returning false for all classes that are not derived from Environment. I also tested to make sure it behaved as an ABC by trying to instantiate an object of type Environment in StudentWorld.cpp and receiving a compile error when I tried to do this. 
+
+I tested the Walls class through my initial testing of the game. I created the walls class and simply set doSomething() to return since walls should never do anything during a tick. I further tested that it would block movement by attempting to step onto walls from every direction and angle when I first created my Penelope class and was able to move her. I also tested that my citizens would not walk onto the wall by having my citizens follow my Penelope character and try to walk them into walls, which was blocked. I also shot flames at walls and set landmines next to walls to make sure that the walls would not be overlapped by the flames. I essentially tried to do every action to the wall and made sure that the wall did nothing in return. 
+
+I tested the Humans class through my usage of the doSomething() function that is defined in this class and is used by Penelope and Citizens. I ensured that when both of these derived classes were called to doSomething in StudentWorld, they referred back to the doSomething function defined by their base class and did not attempt to use a non-existent doSomething in their own classes. I also tested that this was an ABC by trying to make an object of Humans type in the StudentWorld class but this obviously failed. I also insured increaseInfectedTotal() worked by intentionally getting infected when playing the game and making sure that Penelope became disease and the class's functions that were supposed to catch this behavior worked correctly. 
+
+I tested the Zombies class by testing out the common behavior of the zombies that is defined in this class. For instance, both smart and dumb zombies use the doSomething() function that is defined in this class. I ensured that this worked by running a level that had both smart and dumb zombies and watching to make sure that they both stopped for their paralysis tick and would periodically stop to readjust their path, which is defined in the Zombies's class's plan Dist functions. I also ensured that this class was an ABC by trying to instantiate an object of Zombies type in StudentWorld and receiving a compile error (due to the pure virtual function differentZombieActions()). I also made sure the randomDirectionSelector() class worked correctly by verifying that dumbZombies did not attempt to chase Penelope or Citizens.
+
+I tested the Goodies class by ensuring that the differentRequirements function defined in this class to just return worked correctly when used by its derived classes for when they had to doSomething(). For instance, I made sure that I could immediately step onto a newly created goodie in the game. I also made sure that this class was an ABC by attempting to create an object of Goodies type in StudentWorld and receiving a compile error. 
+
+I tested the Permanents class by ensuring that all objects that were derived from the Permanents class could not be killed since canBeKilled() is redefined to return false in this class. For instance, I attempted to kill pits by shooting flames at them but they did nothing, following the behavior of not being able to be killed. I also tested that exits were not killed as they were unaffected by landmines and flames. I also made sure this class was an ABC by trying to instantiate an object of Permanents type in StudentWorld but receiving an error. 
+
+I tested the Penelope class through heavy playing of the game and testing out her different actions. I ensured that Penelope could move correctly through walking through different levels and ensuring that she could not move onto walls or overlap with other moveable actors such as zombies or citizens. I also made sure that her non-moving actions behaved correctly. For instance, I attempted to use flamethrower when Penelope had no flame charges and nothing happened, as I expected. I tested her picking up of goodies by walking on goodies of all types and seeing that they were added to her inventory through the stat line at the top of the screen. I also ensured that Penelope could use vaccines by deliberately being infected by zombies and then using a vaccine I had picked up. I further made sure that Penelope dying would activate the decLives function in StudentWorld by deliberately dying three times and ensuring that this ended the game. I also tested by Penelope by ensuring that walking into a pit or a landmine would kill Penelope.
+
+I tested Citizens through seeing how they would interact with different parts of the environment. At first, I simply put them into an empty arena with Penelope and made sure that they did not move unless Penelope came towards them and then that they only moved towards Penelope and nowhere else. Next, I added zombies to the arena and ensured that Citizens would run away from the zombies when the zombies would come near. Next, I tested the Citizens by ensuring that when Penelope was closer to the citizens than a zombie, the citizens would choose to follow Penelope, but if Penelope was further away than a zombie, but both the zombie and Penelope were within 80 pixels, the citizen would choose to run away from zombie. I also ensured that killing citizens would decrease the score of the game and I tested that citizens could exit the game even when Penelope could not. 
+
+I tested DumbZombies through trying to test out all of their functionality separately. First, I simply put them in an arena alone with Penelope and ensured that they would not have their movement affected if Penelope came near, but rather continued to wander randomly. I then ensured that if Penelope were to stand by a dumb zombie within 10 pixels, the zombies would vomit on Penelope, but not constantly as there should only be a 1/3 chance that a dumb zombie will vomit on Penelope. Next, I tested that dumb zombies could be killed by flames by shooting at dumb zombies with Penelope's flamethrower and then setting up landmines near them and ensuring that them stepping on the landmine would trigger the explosion. Finally, I ensured that they would be killed by pits by setting off landmines to create pits and made sure that zombies would die when they overlapped with the pits. I also tested out that a dumb zombie would throw a vaccine by killing a lot of dumb zombies and ensuring that a vaccine would sporadically be dropped. 
+
+I tested smartZombies through incrementally testing out the different behavior of smart zombies. I started out with an empty arena besides Penelope and the smart zombies and ensured that the smart zombies wandered randomly when Penelope was not within 80 pixels. I then ensured that they would start to track down Penelope when she came nearer by getting within 80 pixels and stopping, letting the zombies walk to her. I then ensured that smart zombies would die correctly by shooting at them with Penelope's flamethrowers and ensuring that they added 2000 points to the score upon death rather than the 1000 of dumb zombies. Finally, I added citizens to the game and made sure that smart zombies would chase after the citizens and attempt to get as close to them as possible and then have a 1/3 chance of vomiting. 
+
+
+I tested Vaccine through testing that the vaccine goodie would behave correctly when added to the game. I started by simply running a level that had vaccines and ensuring that the vaccines were placed on the map and facing the right direction. I then tested that when Penelope would walk on the vaccine goodie, the vaccine goodie would be erased and a vaccine would be added to Penelope's inventory. I then went on and added citizens and zombies to the game and made sure that when citizens and zombies overlapped with vaccine goodies, that the vaccine goodies would not be erased and would be unaffected. Finally, I ensured that vaccine goodies could be destroyed by shooting at them with the flamethrower and setting off landmines nearby them so that the flames would overlap and ensured that the goodies were destroyed from the game. 
+
+I tested GasCan through testing that the gas can goodie would behave correctly when added to the game. I started by only having Penelope and gas can goodies in the game. I ensured that when Penelope would step on the gas can goodies, that the gas can goodies would be erased from the screen and that 5 flame charges would be added to Penelope's inventory. I then made sure that when zombies and citizens were included in the game, that none of the other moveable actors would cause the gas can goodie to disappear when they overlapped with it. I then made sure the gas can goodie could be destroyed by shooting flames at it with the flamethrower and triggering landmines near it. 
+
+I tested the LandmineGoodie class through first making sure that the game would construct the goodie on the level with the correct ID and in the correct position. I then ensured that the LandmineGoodie behaved correctly when Penelope overlapped with it by stepping on it and ensuring that the landmine goodie was erased from the screen and taken out of the actors list. I also tested the landmine goodie class by ensuring that when other moveable actors stepped on the landmine goodies (zombies and citizens), that the landmine goodie would not be erased from the screen. I finally tested that the landmine goodies could be killed by shooting flames at it with Penelope's flamethrower and setting off landmines nearby a landmine goodie so it would be destroyed. 
+
+I tested the Projectiles class by ensuring that the classes that were derived from Projectiles would follow the protocol defined by the functions defined by this class. For instance, I made sure that flames and vomit would both refer to the differentRequirements function that is defined by the Projectiles class, as this function defines that projectiles should be erased from the game after 2 ticks from creation. I also ensured that this class was an ABC by trying to instantiate an object of Projectiles type in the StudentWorld class and receiving a compile error message. 
+
+I tested the Pits class through trying to kill every type of movable actors class with a pit. I first made sure that when Penelope would walk onto a pit that this would kill Penelope and decrement the amount of lives remaining. I then ensured that a citizen or zombie wandering onto a pit and overlapping would kill those actors. I then ensured that a pit could not be killed by shooting flames at pits and setting off landmines near pits and ensuring that the pit was unaffected. Finally, I made sure that pits had a lower depth than flames as the flames would be displayed over top of the pit when flames were shot and covered pits. 
+
+I tested the Exits class through first ensuring that Exits were displayed correctly on the screen and in the correct positions. I then ensured that when there were no citizens on the level, that Penelope could walk onto an exit and then exit out and have the level be won. I also tested exits by ensuring that flames would be prevented from overlapping with exits. I also made sure that all moveable actors would be allowed to overlap with exits, such as zombies, but that citizens would automatically exited from the game when they stepped on an exit but zombies would not. Finally, I ensured that the exits would not allow Penelope to exit if there were still citizens on the level. 
+
+I tested the Flames class through ensuring that flames followed the killing behavior defined by the spec. First, I tested that flames could kill zombies by ensuring that when Penelope would shoot her flamethrower at zombies, this would kill the zombies and erase them from the game. I then ensured that flames could destroy citizens as well and was able to kill citizens with the flamethrower and flames generated by the landmine. I then ensured that flames would kill Penelope as well by setting off a landmine with the flamethrower while standing next to the landmine. Finally, I made sure that flames would not overlap with exits or walls by shooting the flamethrower at those actors. I also watched to make sure flames were erased off the screen after two ticks. 
+
+I tested the Vomit class through ensuring that Vomit was instantiated when zombies were close to humans. I also ensured that this vomit was able to overlap with humans by walking Penelope close to Zombie and watching to make sure that the vomit would cover Penelope and she would then be infected. I also made sure that vomits overlapping with humans would cause infection by having citizens get chased by smart zombies and ensuring the citizens would eventually be infected when the zombies caught them and they overlapped with vomit. Finally, I made sure that vomit would be erased from the screen after two ticks by watching and making sure that the vomit would disappear after a zombie had vomited. 
+
+I tested the StudentWorld class through frequent playing of my game. I made sure that complex interactions, such as landmines being triggered by flames and killing a large group of smart and dumb zombies, would be carried out correctly and behave as defined by the spec. I also made sure that dead actors were correctly erased from the actors member list in StudentWorld and that there were not memory access errors. I also made sure that every time StudentWorld called upon init that the proper members of the StudentWorld class were properly reinitialized, such as resetting the number of humans and zombies on the level and resetting everyone back to their initial positions. I also ensured that the correct statuses were returned at the ends of game, such as ending the game when Penelope had lost all three lives, or ending the game when there no more level files. 
+    
